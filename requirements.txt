@@ -1,5 +1,5 @@
 sentencepiece
-transformers @ https://github.com/huggingface/transformers.git@main
+transformers
 datasets
 numpy
 gradio
