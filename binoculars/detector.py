@@ -23,7 +23,7 @@ class Binoculars(object):
     def __init__(self,
                  observer_name_or_path: str = "codellama/CodeLlama-7b-hf",
                  performer_name_or_path: str = "codellama/CodeLlama-7b-Instruct-hf",
-                 use_bfloat16: bool = False,
+                 use_bfloat16: bool = True,
                  max_token_observed: int = 512,
                  mode: str = "low-fpr",
                  ) -> None:
