@@ -22,7 +22,7 @@ DEVICE_2 = "cuda:1" if torch.cuda.device_count() > 1 else DEVICE_1
 class Binoculars(object):
     def __init__(self,
                  observer_name_or_path: str = "codellama/CodeLlama-7b-hf",
-                 performer_name_or_path: str = "codellama/CodeLlama-7b-Python-hf",
+                 performer_name_or_path: str = "codellama/CodeLlama-7b-Instruct-hf",
                  use_bfloat16: bool = True,
                  max_token_observed: int = 512,
                  mode: str = "low-fpr",
