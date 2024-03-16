@@ -18,13 +18,11 @@ BINOCULARS_FPR_THRESHOLD = 0.8536432310785527  # optimized for low-fpr [chosen a
 DEVICE_1 = "cuda:0" if torch.cuda.is_available() else "cpu"
 DEVICE_2 = "cuda:1" if torch.cuda.device_count() > 1 else DEVICE_1
 
-
-
 class Binoculars(object):
     def __init__(self,
-                 observer_name_or_path: str = "codellama/CodeLlama-7b-hf",
-                 performer_name_or_path: str = "codellama/CodeLlama-7b-Instruct-hf",
-                 use_bfloat16: bool = True,
+                 observer_name_or_path: str = "https://huggingface.co/Salesforce/codet5p-220m",
+                 performer_name_or_path: str = "https://huggingface.co/Salesforce/codet5p-220m",
+                 use_bfloat16: bool = False,
                  max_token_observed: int = 512,
                  mode: str = "low-fpr",
                  ) -> None:
@@ -37,7 +35,7 @@ class Binoculars(object):
                                                                    torch_dtype=torch.bfloat16 if use_bfloat16
                                                                    else torch.float32,
                                                                    token=huggingface_config["TOKEN"]
-                                                                   )
+                                                                   ).encoder
         self.performer_model = AutoModelForCausalLM.from_pretrained(performer_name_or_path,
                                                                     device_map={"": DEVICE_2},
                                                                     trust_remote_code=True,
