@@ -3,7 +3,7 @@ from typing import Union
 import numpy as np
 import torch
 import transformers
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from config import huggingface_config
 from .utils import assert_tokenizer_consistency
@@ -18,31 +18,32 @@ BINOCULARS_FPR_THRESHOLD = 0.8536432310785527  # optimized for low-fpr [chosen a
 DEVICE_1 = "cuda:0" if torch.cuda.is_available() else "cpu"
 DEVICE_2 = "cuda:1" if torch.cuda.device_count() > 1 else DEVICE_1
 
+
 class Binoculars(object):
     def __init__(self,
-                 observer_name_or_path: str = "Salesforce/codet5p-220m",
-                 performer_name_or_path: str = "Salesforce/codet5p-220m",
-                 use_bfloat16: bool = False,
+                 observer_name_or_path: str = "tiiuae/falcon-7b",
+                 performer_name_or_path: str = "tiiuae/falcon-7b-instruct",
+                 use_bfloat16: bool = True,
                  max_token_observed: int = 512,
                  mode: str = "low-fpr",
                  ) -> None:
         assert_tokenizer_consistency(observer_name_or_path, performer_name_or_path)
 
         self.change_mode(mode)
-        self.observer_model = AutoModelForSeq2SeqLM.from_pretrained(observer_name_or_path,
+        self.observer_model = AutoModelForCausalLM.from_pretrained(observer_name_or_path,
                                                                    device_map={"": DEVICE_1},
                                                                    trust_remote_code=True,
                                                                    torch_dtype=torch.bfloat16 if use_bfloat16
                                                                    else torch.float32,
                                                                    token=huggingface_config["TOKEN"]
-                                                                   ).encoder
-        self.performer_model = AutoModelForSeq2SeqLM.from_pretrained(performer_name_or_path,
+                                                                   )
+        self.performer_model = AutoModelForCausalLM.from_pretrained(performer_name_or_path,
                                                                     device_map={"": DEVICE_2},
                                                                     trust_remote_code=True,
                                                                     torch_dtype=torch.bfloat16 if use_bfloat16
                                                                     else torch.float32,
                                                                     token=huggingface_config["TOKEN"]
-                                                                    ).decoder
+                                                                    )
         self.observer_model.eval()
         self.performer_model.eval()
 
@@ -72,10 +73,13 @@ class Binoculars(object):
 
     @torch.inference_mode()
     def _get_logits(self, encodings: transformers.BatchEncoding) -> torch.Tensor:
-        observer_logits = self.observer_model(**encodings.to(DEVICE_1)).lm_logits
-        performer_logits = self.performer_model(**encodings.to(DEVICE_2)).lm_logits
+        observer_logits = self.observer_model(**encodings.to(DEVICE_1)).logits
+        performer_logits = self.performer_model(**encodings.to(DEVICE_2)).logits
         if DEVICE_1 != "cpu":
             torch.cuda.synchronize()
+        print(observer_logits)
+        print("-"*20)
+        print(performer_logits)
         return observer_logits, performer_logits
 
     def compute_score(self, input_text: Union[list[str], str]) -> Union[float, list[float]]:
