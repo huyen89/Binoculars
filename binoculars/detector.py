@@ -35,14 +35,14 @@ class Binoculars(object):
                                                                    torch_dtype=torch.bfloat16 if use_bfloat16
                                                                    else torch.float32,
                                                                    token=huggingface_config["TOKEN"]
-                                                                   ).encoder
+                                                                   )
         self.performer_model = T5ForConditionalGeneration.from_pretrained(performer_name_or_path,
                                                                     device_map={"": DEVICE_2},
                                                                     trust_remote_code=True,
                                                                     torch_dtype=torch.bfloat16 if use_bfloat16
                                                                     else torch.float32,
                                                                     token=huggingface_config["TOKEN"]
-                                                                    ).decoder
+                                                                    )
         self.observer_model.eval()
         self.performer_model.eval()
 
