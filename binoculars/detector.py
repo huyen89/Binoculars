@@ -3,7 +3,7 @@ from typing import Union
 import numpy as np
 import torch
 import transformers
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import T5ForConditionalGeneration, AutoTokenizer
 
 from config import huggingface_config
 from .utils import assert_tokenizer_consistency
@@ -29,14 +29,14 @@ class Binoculars(object):
         assert_tokenizer_consistency(observer_name_or_path, performer_name_or_path)
 
         self.change_mode(mode)
-        self.observer_model = AutoModelForSeq2SeqLM.from_pretrained(observer_name_or_path,
+        self.observer_model = T5ForConditionalGeneration.from_pretrained(observer_name_or_path,
                                                                    device_map={"": DEVICE_1},
                                                                    trust_remote_code=True,
                                                                    torch_dtype=torch.bfloat16 if use_bfloat16
                                                                    else torch.float32,
                                                                    token=huggingface_config["TOKEN"]
                                                                    ).encoder
-        self.performer_model = AutoModelForSeq2SeqLM.from_pretrained(performer_name_or_path,
+        self.performer_model = T5ForConditionalGeneration.from_pretrained(performer_name_or_path,
                                                                     device_map={"": DEVICE_2},
                                                                     trust_remote_code=True,
                                                                     torch_dtype=torch.bfloat16 if use_bfloat16
@@ -72,8 +72,8 @@ class Binoculars(object):
 
     @torch.inference_mode()
     def _get_logits(self, encodings: transformers.BatchEncoding) -> torch.Tensor:
-        observer_logits = self.observer_model(**encodings.to(DEVICE_1)).last_hidden_state
-        performer_logits = self.performer_model(**encodings.to(DEVICE_2)).last_hidden_state
+        observer_logits = self.observer_model(**encodings.to(DEVICE_1)).logits
+        performer_logits = self.performer_model(**encodings.to(DEVICE_2)).logits
         if DEVICE_1 != "cpu":
             torch.cuda.synchronize()
         return observer_logits, performer_logits
