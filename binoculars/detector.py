@@ -20,8 +20,8 @@ DEVICE_2 = "cuda:1" if torch.cuda.device_count() > 1 else DEVICE_1
 
 class Binoculars(object):
     def __init__(self,
-                 observer_name_or_path: str = "Salesforce/codet5p-220m",
-                 performer_name_or_path: str = "Salesforce/codet5p-220m",
+                 observer_name_or_path: str = "microsoft/codebert-base",
+                 performer_name_or_path: str = "microsoft/codebert-base",
                  use_bfloat16: bool = False,
                  max_token_observed: int = 512,
                  mode: str = "low-fpr",
