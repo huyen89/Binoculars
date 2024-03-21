@@ -43,7 +43,7 @@ class Binoculars(object):
                                                                     torch_dtype=torch.bfloat16 if use_bfloat16
                                                                     else torch.float32,
                                                                     token=huggingface_config["TOKEN"],
-                                                                    is_decoder=True)
+                                                                    is_decoder=False)
         self.observer_model.eval()
         self.performer_model.eval()
 
