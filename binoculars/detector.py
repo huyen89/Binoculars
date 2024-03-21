@@ -73,8 +73,8 @@ class Binoculars(object):
 
     @torch.inference_mode()
     def _get_logits(self, encodings: transformers.BatchEncoding) -> torch.Tensor:
-        observer_logits = self.observer_model(encodings.to(DEVICE_1)).logits
-        performer_logits = self.performer_model(encodings.to(DEVICE_2)).logits
+        observer_logits = self.observer_model(**encodings.to(DEVICE_1)).logits
+        performer_logits = self.performer_model(**encodings.to(DEVICE_2)).logits
         if DEVICE_1 != "cpu":
             torch.cuda.synchronize()
         return observer_logits, performer_logits
