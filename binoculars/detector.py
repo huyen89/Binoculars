@@ -21,8 +21,8 @@ DEVICE_2 = "cuda:1" if torch.cuda.device_count() > 1 else DEVICE_1
 
 class Binoculars(object):
     def __init__(self,
-                 observer_name_or_path: str = "Salesforce/codet5-base",
-                 performer_name_or_path: str = "Salesforce/codet5p-220m",
+                 observer_name_or_path: str = "microsoft/codebert-base",
+                 performer_name_or_path: str = "FacebookAI/roberta-base",
                  use_bfloat16: bool = True,
                  max_token_observed: int = 512,
                  mode: str = "low-fpr",
@@ -43,7 +43,7 @@ class Binoculars(object):
                                                                     torch_dtype=torch.bfloat16 if use_bfloat16
                                                                     else torch.float32,
                                                                     token=huggingface_config["TOKEN"],
-                                                                    is_decoder=True).decoder
+                                                                    is_decoder=True)
         self.observer_model.eval()
         self.performer_model.eval()
 
